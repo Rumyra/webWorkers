@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		body {margin:0px; padding:0px; color:white;}
+
+		#screen {
+			/* start with some arbitrary vals*/
+			--smoothness: 1;
+		  box-sizing: border-box;
+		  margin: 10px; padding: 0px;
+		  width: calc(100vw - 20px);
+		  height: calc(100vh - 20px);
+		  background-color: #111;
+		  background-image: paint(spiral);
+		}
+	</style>
+</head>
+<body>
+
+	<div id="screen"></div>
+
+	<script type="text/javascript">
+
+		const screen = document.querySelector('#screen');
+		console.log(screen);
+
+	  CSS.paintWorklet.addModule('spiral-orig.js');
+
+	</script>
+</body>
+</html>

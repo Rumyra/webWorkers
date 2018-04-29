@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		body {margin:0px; padding:0px;}
+
+		#screen {
+			--star-colour: hsla(320, 50%, 50%, 1); /* col val | default is white */
+			--star-scale: 3; /* int | default is 1 */
+		  box-sizing: border-box;
+		  margin: 10px; padding: 0px;
+		  width: calc(100vw - 20px);
+		  height: calc(100vh - 20px);
+		  background-color: #111;
+		  background-image: paint(shape);
+		}
+	</style>
+</head>
+<body>
+
+	<section id="screen"></section>
+
+	<script type="text/javascript">
+
+		const screen = document.querySelector('#screen');
+		console.log(screen);
+
+	  CSS.paintWorklet.addModule('shape.js');
+
+	</script>
+</body>
+</html>
