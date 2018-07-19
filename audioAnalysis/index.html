@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Audio analysis in a worker</title>
+  <style type="text/css">
+  </style>
+</head>
+<body>
+
+	<h2>Help!</h2>
+
+  <p>OK here's the deal: I would like to move my audio re-analysis off the main thread.</p>
+
+  <p>Nothing much is happening within this file as it stands at the moment.</p>
+
+  <p>Most of the important stuff is happening within visual_init.js, where I'm getting the audio stream from the mic, creating an analyser (see the module m_audio.js) and analysing the stream.</p>
+
+  <p>I have created a worker (w_analysis.js) to test altering the analysis data I receive - however it's not really working, as soon as I start to post the data back and forth it's not happy.</p>
+
+  <p>What is wrong tho?</p>
+
+  <p id="result"></p>
+
+  <script type="module" src="visual_init.js"></script>
+
+<script type="text/javascript">
+
+// pass in arr of shape count for both canvas functions
+function adjustFreqData(freqResolutions, mixArrCount) {
+  analyserNode.getByteFrequencyData(frequencyData);
+  var removed = frequencyData.slice(0,1024);
+
+  var newFreqsOne = [], newFreqsTwo = [], mixFreqs = [], lowFreqs, midFreqs, highFreqs;
+
+  function returnNewArr(newCount) {
+
+    // set up the maxPow & thus ratio based on newCount
+    var maxPow = Math.pow(2,newCount/2);
+    var ratio = 1024/maxPow;
+    var prevRangeStart = 0, prevItemCount = 0, newArr = [];
+
+    // looping - get values for new array based on shapeCount
+    for (let j=1; j<newCount+1; j++) {
+      var itemCount, rangeStart;
+
+      var pow = j/2;
+
+      // use ratio to get itemCount (round)
+      itemCount = Math.ceil( ((Math.pow(2, pow))*ratio)/2 );
+
+      rangeStart = prevRangeStart + Math.ceil(prevItemCount/2);
+       // get new values
+      var newValue = 0, total = 0;
+      for (let k=rangeStart; k<rangeStart+itemCount; k++) {
+        // add up items and divide by total
+        total += frequencyData[k];
+        newValue = parseInt(total/itemCount);
+      }
+      // add to new array
+      newArr.push(newValue);
+
+      prevItemCount = itemCount;
+      prevRangeStart = rangeStart;
+
+    }
+
+    return newArr;
+
+  } // returnNewArr
+
+  newFreqsOne = returnNewArr(freqResolutions[0]);
+  newFreqsTwo = returnNewArr(freqResolutions[1]);
+  mixFreqs = returnNewArr(mixArrCount);
+
+  // low mid high
+  var oneThird = Math.floor(1024/3);
+
+  function avFreqs(arrPart) {
+    var arrPart = arrPart;
+    var avValue;
+    var totalVal = 0;
+    for (let l=0; l<arrPart.length; l++) {
+      totalVal += arrPart[l];
+    }
+    avValue = Math.floor(totalVal/arrPart.length);
+    return avValue;
+  } // avfreqs
+
+  lowFreqs = avFreqs(frequencyData.slice(0,oneThird));
+  midFreqs = avFreqs(frequencyData.slice(oneThird, oneThird*2));
+  highFreqs = avFreqs(frequencyData.slice(oneThird*2));
+
+  return {
+    newFreqsOne: newFreqsOne,
+    newFreqsTwo: newFreqsTwo,
+    mixFreqs: mixFreqs,
+
+    lowFreqs: lowFreqs,
+    midFreqs: midFreqs,
+    highFreqs: highFreqs
+  };
+}
+
+
+
+</script>
+
+</body>
+</html>
